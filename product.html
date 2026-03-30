@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Details</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Search Inline Header -->
+<div class="top-header">
+    <a href="index.html"><i class="ri-arrow-left-line menu-btn"></i></a>
+    
+    <!-- Normal Icons -->
+    <div class="header-icons" id="header-icons-normal" style="flex-grow:1; display:flex; justify-content:flex-end;">
+        <i class="ri-search-line" onclick="toggleInlineSearch()"></i>
+        <a href="checkout.html" style="margin-left:15px;">
+            <div class="cart-icon-wrapper">
+                <i class="ri-shopping-cart-2-line"></i>
+                <span class="cart-badge">0</span>
+            </div>
+        </a>
+    </div>
+    
+    <!-- Hidden Search Box -->
+    <div class="header-search-box" id="header-search-input-box">
+        <input type="text" id="inline-search-val" placeholder="Search shop...">
+        <i class="ri-close-line" onclick="toggleInlineSearch()" style="font-size:20px; margin-left:10px;"></i>
+    </div>
+</div>
+
+<!-- Square Image Container with Blur Background -->
+<div class="product-image-container">
+    <img id="main-img-bg" src="" class="bg-blur">
+    <img id="main-img" src="" class="detail-image" alt="Loading...">
+</div>
+
+<div class="gallery-strip"></div>
+
+<div class="detail-info">
+    <div class="detail-price">Loading...</div>
+    <h1 class="detail-title">Loading...</h1>
+    <!-- Tags Container -->
+<div class="product-tags" id="tags-container"></div>
+</div>
+
+<!-- RE-SEQUENCED: Delivery First, Description Second -->
+
+<div class="info-text" id="delivery-info">Loading...</div>
+
+<!-- NEW: Color Variations Preview -->
+<div class="info-text" id="color-preview-info" style="display:none; border-top:1px solid #eee;">
+    <div style="font-weight:bold; margin-bottom:10px; font-size:13px; color:#555;">Available Variants</div>
+    <div id="color-preview-list" style="display:flex; gap:12px; overflow-x:auto; padding-bottom:5px;"></div>
+</div>
+
+<div class="section-title">Product Details</div>
+<div class="info-text" id="description-info">Loading...</div>
+
+<!-- Similar Products Section -->
+<div class="section-title" style="margin-top:20px;">You May Also Like</div>
+<div class="product-grid" id="similar-grid" style="margin-bottom: 20px;"></div>
+
+    <!-- Bottom navigation bar -->
+    <div class="bottom-nav product-bottom-nav">
+        <a href="index.html" class="icon-btn"><i class="ri-home-5-line"></i> Home</a>
+        <!-- Chat Button (Updated) -->
+<div class="icon-btn" onclick="openMessenger()" style="cursor:pointer;">
+    <i class="ri-chat-1-line"></i> Chat
+</div>
+        <button class="btn-buy" onclick="openModal('buy')">Buy Now</button>
+        <button class="btn-cart" onclick="openModal('cart')">Add to Cart</button>
+    </div>
+
+    <!-- MODAL -->
+    <div class="sidebar-overlay" id="modal-overlay" onclick="closeModal()"></div>
+<!-- MODAL (UPDATED WITH PRICE DISPLAY) -->
+<!-- MODAL (UPDATED WITH IMAGE & TITLE) -->
+<div class="selection-modal" id="buy-modal">
+<!-- New Daraz Style Header (Title First, Top Aligned) -->
+<div style="display:flex; gap:12px; align-items:flex-start; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:15px; position:relative;">
+    
+    <!-- Thumbnail Image -->
+    <img id="modal-thumb" src="" style="width:80px; height:80px; border-radius:4px; object-fit:cover; border:1px solid #ddd; background:white;">
+    
+    <!-- Details (Title First, Then Price, Top Aligned) -->
+    <div style="flex-grow:1; display:flex; flex-direction:column; justify-content:flex-start; padding-right:25px;">
+        <span id="modal-title" style="font-size:14px; color:#333; font-weight:500; margin-bottom:6px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; line-height:1.3;">Loading...</span>
+        <span id="modal-price" style="color:var(--primary); font-weight:bold; font-size:18px;">Loading...</span>
+    </div>
+    
+    <!-- Close Button (Absolute positioned to top right) -->
+    <i class="ri-close-line" style="font-size:24px; color:#555; position:absolute; top:0; right:0; cursor:pointer;" onclick="closeModal()"></i>
+</div>
+    
+    <!-- JS will inject Colors here -->
+    <div class="variant-section"></div>
+    
+    <!-- JS will inject Sizes here -->
+    <div class="variant-section"></div>
+    
+    <!-- Quantity -->
+    <div class="variant-section">
+        <p class="variant-title">Quantity</p>
+        <div class="qty-control">
+            <button class="qty-btn" onclick="updateQty(-1)">-</button>
+            <span class="qty-val" id="qty-display">1</span>
+            <button class="qty-btn" onclick="updateQty(1)">+</button>
+        </div>
+    </div>
+    
+    <button class="place-order-btn" onclick="confirmSelection()">Confirm</button>
+</div>
+    
+<!-- Image full screen -->
+<div class="fullscreen-img-modal" id="fs-modal" onclick="closeFullscreen()">
+    <i class="ri-close-line close-fullscreen"></i>
+    <img id="fs-img" src="">
+</div>
+
+
+<script src="global.js"></script>
+<!-- Page native Script -->
+<script>
+    // product.js
+// --- PRODUCT PAGE VARIABLES (Put these at the top of your script) ---
+let currentProduct = null;
+let selectedVariant = { color: null, size: null, qty: 1 };
+let basePrice = 0; // Remembers the default product price
+let currentAction = 'buy';
+let currentImageIndex = 0;
+let touchstartX = 0;
+let touchendX = 0;
+
+// --- 1. FULL INITIALIZATION FUNCTION ---
+// --- FIX: FULL INITIALIZATION FUNCTION ---
+// --- 1. FULL INITIALIZATION FUNCTION (WITH BASE PRICE) ---
+// --- 1. FULL INITIALIZATION FUNCTION (CRASH FIXED) ---
+// --- 1. FULL INITIALIZATION FUNCTION (UPDATED MODAL TEXTS) ---
+// ============================================================
+// loadDetails() — Main function that loads the product page.
+//
+// THE BUG THAT WAS HERE:
+// When a user clicks a product card quickly (before the home page
+// finishes loading all images), the browser may throttle or queue
+// the fetch() for products.json because the home page's fetch is
+// still in-flight. This causes await getProducts() to return []
+// — not because of a real error, but because the fetch was starved.
+// Products with many images (like J1 with 12 images) or products
+// that appear early in the grid (like 105) are clicked before the
+// home page fetch is done, making them the most common victims.
+//
+// THE FIX:
+// Retry getProducts() up to 3 times with a short delay if it
+// returns an empty array, before giving up and showing "Not Found".
+// This gives the browser time to free up the network and complete
+// the fetch on the second or third attempt.
+// ============================================================
+async function loadDetails() {
+
+    // --- RETRY LOGIC ---
+    // Try fetching products up to 3 times, waiting 400ms between attempts.
+    // This fixes the race condition where clicking too fast causes fetch()
+    // to return [] because the browser is still busy with the home page.
+    let products = [];
+    const MAX_RETRIES = 3;       // ← Change this if you want more/fewer retries
+    const RETRY_DELAY_MS = 400;  // ← Change this wait time between retries (milliseconds)
+
+    for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        products = await getProducts();
+
+        if (products.length > 0) {
+            break; // Got data successfully, stop retrying
+        }
+
+        // If this wasn't the last attempt, wait before trying again
+        if (attempt < MAX_RETRIES) {
+            await new Promise(resolve => setTimeout(resolve, RETRY_DELAY_MS));
+        }
+    }
+
+    // After all retries, try to find the product whose ID matches the URL
+    // Use String() on both sides to safely handle both number and string IDs
+    currentProduct = products.find(p => String(p.id) === String(getUrlParam('id')));
+
+    if (!currentProduct) {
+        document.body.innerHTML = "<h2 style='text-align:center; padding: 50px;'>Product Not Found</h2>";
+        return;
+    }
+
+    // Reset all state variables for this product load
+    // (prevents bleed-over if somehow the page is reused without a full reload)
+    basePrice = currentProduct.price;
+    selectedVariant = { color: null, size: null, qty: 1 };
+    currentImageIndex = 0;
+
+    // --- Everything below is UNCHANGED from your original code ---
+
+    const mainImg = document.getElementById('main-img');
+    const mainImgBg = document.getElementById('main-img-bg');
+    
+    if (mainImg && mainImgBg) {
+        mainImg.src = currentProduct.images[0];
+        mainImgBg.src = currentProduct.images[0];
+        currentImageIndex = 0;
+        
+        mainImg.onclick = () => {
+            document.getElementById('fs-img').src = mainImg.src;
+            document.getElementById('fs-modal').classList.add('active');
+        };
+    }
+    
+    if (!currentProduct.in_stock) {
+        const imgContainer = document.querySelector('.product-image-container');
+        if (imgContainer) imgContainer.insertAdjacentHTML('beforeend', `<div class="out-of-stock-badge">Out of Stock</div>`);
+        const buyBtn = document.querySelector('.btn-buy');
+        const cartBtn = document.querySelector('.btn-cart');
+        if (buyBtn) { buyBtn.innerText = "Sold Out"; buyBtn.classList.add('btn-disabled'); buyBtn.onclick = null; }
+        if (cartBtn) { cartBtn.innerText = "Unavailable"; cartBtn.classList.add('btn-disabled'); cartBtn.onclick = null; }
+    }
+    
+    document.querySelector('.detail-title').innerText = currentProduct.name;
+    const oldPriceHtml = currentProduct.original_price ? `<span class="p-old-price">৳ ${currentProduct.original_price}</span>` : '';
+    document.querySelector('.detail-price').innerHTML = `৳ ${currentProduct.price} ${oldPriceHtml}`;
+    
+    const modalTitleEl = document.getElementById('modal-title');
+    if (modalTitleEl) modalTitleEl.innerText = currentProduct.name;
+    
+    const formattedDesc = currentProduct.description ? String(currentProduct.description).replace(/\n/g, '<br>') : 'No description available.';
+    document.getElementById('description-info').innerHTML = formattedDesc;
+    
+    document.getElementById('delivery-info').innerHTML = `<i class="ri-truck-line"></i> ${calculateDelivery(currentProduct.delivery_days)}`;
+    
+    const tagsContainer = document.getElementById('tags-container');
+    if (tagsContainer) {
+        if (currentProduct.tags && currentProduct.tags.length > 0) {
+            tagsContainer.innerHTML = currentProduct.tags.map(t => `<span class="tag-pill" onclick="window.location.href='index.html?search=${encodeURIComponent(t)}'">${t}</span>`).join('');
+        } else tagsContainer.innerHTML = '';
+    }
+
+    document.querySelector('.gallery-strip').innerHTML = currentProduct.images.map((img, i) => `
+        <img src="${img}" class="thumbnail ${i===0?'active':''}" onclick="changeImage(this, ${i})">
+    `).join('');
+    
+    const imgContainer = document.querySelector('.product-image-container');
+    if (imgContainer) {
+        imgContainer.addEventListener('touchstart', e => { touchstartX = e.changedTouches[0].screenX; }, {passive: true});
+        imgContainer.addEventListener('touchend', e => { touchendX = e.changedTouches[0].screenX; handleSwipe(); }, {passive: true});
+    }
+
+    const variantSections = document.querySelectorAll('.variant-section');
+    if (currentProduct.colors && currentProduct.colors.length > 0) {
+        let colorHtml = `<p class="variant-title">Color</p>`;
+        currentProduct.colors.forEach((c, i) => {
+            colorHtml += `<div class="color-option" onclick="selectColor(this, ${i})">
+                            <img src="${c.img}" alt="${c.name}"> <span>${c.name}</span>
+                          </div>`;
+        });
+        variantSections[0].innerHTML = colorHtml;
+        variantSections[0].style.display = 'flex';
+    } else {
+        variantSections[0].style.display = 'none';
+        selectedVariant.color = { name: 'Default' };
+    }
+    
+    if (currentProduct.sizes && currentProduct.sizes.length > 0) {
+        let sizeHtml = `<p class="variant-title">Size</p>`;
+        currentProduct.sizes.forEach((s, i) => {
+            sizeHtml += `<span class="size-option" onclick="selectSize(this, '${s}')">${s}</span>`;
+        });
+        variantSections[1].innerHTML = sizeHtml;
+        variantSections[1].style.display = 'flex';
+    } else {
+        variantSections[1].style.display = 'none';
+        selectedVariant.size = 'Default';
+    }
+
+    const colorPreviewInfo = document.getElementById('color-preview-info');
+    const colorPreviewList = document.getElementById('color-preview-list');
+    if (currentProduct.colors && currentProduct.colors.length > 0) {
+        let previewHtml = '';
+        currentProduct.colors.forEach((c, i) => {
+            previewHtml += `<div class="color-option" onclick="openModalWithColor(${i})" style="flex-shrink:0;">
+                <img src="${c.img}" alt="${c.name}"> <span>${c.name}</span>
+            </div>`;
+        });
+        if(colorPreviewList) colorPreviewList.innerHTML = previewHtml;
+        if(colorPreviewInfo) colorPreviewInfo.style.display = 'block';
+    } else { if(colorPreviewInfo) colorPreviewInfo.style.display = 'none'; }
+
+    renderSimilarProducts(products, currentProduct);
+    syncPriceWithImage(currentProduct.images[0]);
+}
+
+window.addEventListener('pageshow', function(event) {
+    // event.persisted is true ONLY when the browser restored this
+    // page from bfcache instead of loading it fresh.
+    // In that case, loadDetails() never ran again, so we force a reload.
+    if (event.persisted) {
+        window.location.reload();
+    }
+});
+
+
+// --- 2. DYNAMIC PRICE SYNCHRONIZATION (UPDATED MODAL IMAGE) ---
+function syncPriceWithImage(imgUrl) {
+    if (!currentProduct) return;
+    
+    if (currentProduct.colors) {
+        const matchedColor = currentProduct.colors.find(c => c.img === imgUrl);
+        if (matchedColor && matchedColor.price) {
+            currentProduct.price = matchedColor.price;
+        } else {
+            currentProduct.price = basePrice; 
+        }
+    }
+    
+    const oldPriceHtml = currentProduct.original_price ? `<span class="p-old-price">৳ ${currentProduct.original_price}</span>` : '';
+    const priceHtml = `৳ ${currentProduct.price} ${oldPriceHtml}`;
+    
+    // Update main product page price
+    const priceEl = document.querySelector('.detail-price');
+    if (priceEl) priceEl.innerHTML = priceHtml;
+    
+    // Update the Modal Price
+    const modalPriceEl = document.getElementById('modal-price');
+    if (modalPriceEl) modalPriceEl.innerHTML = `৳ ${currentProduct.price}`;
+    
+    // NEW: Update the Modal Thumbnail Image
+    const modalThumbEl = document.getElementById('modal-thumb');
+    if (modalThumbEl) modalThumbEl.src = imgUrl;
+}
+
+
+
+// --- NEW: OPEN MODAL AND PRE-SELECT COLOR ---
+function openModalWithColor(index) {
+    // 1. Open the modal (Defaults to 'buy' mode, which is standard behavior)
+    openModal('buy');
+    
+    // 2. Find the exact color option INSIDE the modal and trigger the selection
+    // We target '.variant-section .color-option' to ensure we only select the modal's buttons
+    const modalColorOptions = document.querySelectorAll('.variant-section .color-option');
+    if (modalColorOptions[index]) {
+        selectColor(modalColorOptions[index], index);
+    }
+}
+
+
+// --- 2. HEADER SEARCH & DELIVERY LOGIC ---
+function toggleInlineSearch() {
+    const icons = document.getElementById('header-icons-normal');
+    const searchBox = document.getElementById('header-search-input-box');
+    
+    // Only run if the elements exist in HTML
+    if (!icons || !searchBox) return;
+
+    if (searchBox.classList.contains('active')) {
+        searchBox.classList.remove('active');
+        icons.style.display = 'flex';
+    } else {
+        searchBox.classList.add('active');
+        icons.style.display = 'none';
+        document.getElementById('inline-search-val').focus();
+    }
+}
+
+// Listen for enter on inline search
+const inlineSearchInput = document.getElementById('inline-search-val');
+if (inlineSearchInput) {
+    inlineSearchInput.addEventListener('keyup', (e) => {
+        if (e.key === 'Enter') {
+            const val = e.target.value;
+            window.location.href = 'index.html?search=' + encodeURIComponent(val);
+        }
+    });
+}
+
+// --- 3. DELIVERY CALCULATION (CRASH FIXED) ---
+function calculateDelivery(daysStr) {
+    if(!daysStr) return "Standard Delivery";
+    
+    // CRASH FIX: Force 'daysStr' to be a String so .match() doesn't fail if JSON sends a raw number
+    let str = String(daysStr); 
+    let parts = str.match(/\d+/g);
+    
+    if(!parts) return str;
+    
+    let min = parseInt(parts[0]);
+    let max = parts.length > 1 ? parseInt(parts[1]) : min;
+    
+    let d1 = new Date(); d1.setDate(d1.getDate() + min);
+    let d2 = new Date(); d2.setDate(d2.getDate() + max);
+    
+    let opts = { month: 'short', day: 'numeric' };
+    return `Estimated Delivery: <b>${d1.toLocaleDateString('en-US', opts)} - ${d2.toLocaleDateString('en-US', opts)}</b>`;
+}
+
+// --- 3. UI INTERACTIONS ---
+// Modify your existing changeImage(thumb) to also update currentImageIndex
+// --- UPDATED: IMAGE CLICKS (Updates Price) ---
+function changeImage(thumb, index) {
+    currentImageIndex = index || 0;
+    document.getElementById('main-img').src = thumb.src;
+    document.getElementById('main-img-bg').src = thumb.src;
+    document.querySelectorAll('.thumbnail').forEach(t => t.classList.remove('active'));
+    thumb.classList.add('active');
+    
+    syncPriceWithImage(thumb.src);
+}
+
+// --- FIX: ZOOM BUG HACK ---
+// Forces viewport rescale to snap browser out of pinch-zoom when closing modal
+function closeFullscreen() {
+    const viewportMeta = document.querySelector('meta[name="viewport"]');
+    if (viewportMeta) {
+        const originalContent = viewportMeta.getAttribute('content');
+        viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+        setTimeout(() => { viewportMeta.setAttribute('content', originalContent); }, 100);
+    }
+    document.getElementById('fs-modal').classList.remove('active');
+}
+
+// --- SWIPE LOGIC ---
+function handleSwipe() {
+    if (touchendX < touchstartX - 40) swipeNext(); // Swiped left
+    if (touchendX > touchstartX + 40) swipePrev(); // Swiped right
+}
+
+function swipeNext() {
+    if (!currentProduct.images || currentProduct.images.length <= 1) return;
+    currentImageIndex = (currentImageIndex + 1) % currentProduct.images.length;
+    updateImageFromSwipe();
+}
+
+function swipePrev() {
+    if (!currentProduct.images || currentProduct.images.length <= 1) return;
+    currentImageIndex = (currentImageIndex - 1 + currentProduct.images.length) % currentProduct.images.length;
+    updateImageFromSwipe();
+}
+
+// --- UPDATED: IMAGE SWIPE (Updates Price) ---
+function updateImageFromSwipe() {
+    const newSrc = currentProduct.images[currentImageIndex];
+    document.getElementById('main-img').src = newSrc;
+    document.getElementById('main-img-bg').src = newSrc;
+    
+    const thumbs = document.querySelectorAll('.thumbnail');
+    thumbs.forEach(t => t.classList.remove('active'));
+    if (thumbs[currentImageIndex]) {
+        thumbs[currentImageIndex].classList.add('active');
+        thumbs[currentImageIndex].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+    
+    syncPriceWithImage(newSrc);
+}
+
+// --- UPDATED: SELECT COLOR (Updates Price) ---
+function selectColor(el, index) {
+    document.querySelectorAll('.color-option').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedVariant.color = currentProduct.colors[index];
+    
+    document.getElementById('main-img').src = currentProduct.colors[index].img;
+    document.getElementById('main-img-bg').src = currentProduct.colors[index].img;
+    
+    syncPriceWithImage(currentProduct.colors[index].img);
+}
+
+
+function selectSize(el, size) {
+    document.querySelectorAll('.size-option').forEach(s => s.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedVariant.size = size;
+}
+
+function updateQty(change) {
+    let el = document.getElementById('qty-display');
+    let val = parseInt(el.innerText) + change;
+    if(val < 1) val = 1;
+    el.innerText = val;
+    selectedVariant.qty = val;
+}
+
+function openModal(action) {
+    currentAction = action;
+    document.getElementById('buy-modal').classList.add('active');
+    document.getElementById('modal-overlay').classList.add('active');
+}
+
+function closeModal() {
+    document.getElementById('buy-modal').classList.remove('active');
+    document.getElementById('modal-overlay').classList.remove('active');
+}
+
+// --- SIMILAR PRODUCTS LOGIC ---
+// --- FIX: SIMILAR PRODUCTS LOGIC ---
+// --- FIX: ADVANCED SIMILAR PRODUCTS ALGORITHM ---
+function renderSimilarProducts(allProds, currProd) {
+    let currTags = currProd.tags ||[];
+    
+    // Assign scores to each product based on similarity
+    let scoredProducts = allProds.filter(p => p.id !== currProd.id && p.in_stock === true).map(p => {
+        let score = 0;
+        let pTags = p.tags ||[];
+        
+        let sameType = (p.type === currProd.type);
+        let sameSubType = (p.sub_type && p.sub_type === currProd.sub_type);
+        let sharedTagsCount = pTags.filter(t => currTags.includes(t)).length;
+
+        if (sameType && sameSubType) score += 10;
+        else if (sameType && sharedTagsCount > 0) score += 5;
+        else if (sameType) score += 2;
+        else if (sharedTagsCount > 0) score += 1;
+        
+        return { product: p, score: score };
+    });
+
+    // Sort by highest score, remove 0 scores, take top 4
+    let similar = scoredProducts.filter(item => item.score > 0)
+                                .sort((a, b) => b.score - a.score)
+                                .map(item => item.product)
+                                .slice(0, 4);
+    
+    const grid = document.getElementById('similar-grid');
+    if (!grid) return;
+    if (similar.length === 0) { 
+        grid.style.display = 'none'; 
+        if (grid.previousElementSibling) grid.previousElementSibling.style.display = 'none';
+        return; 
+    }
+    grid.style.display = 'flex';
+    if (grid.previousElementSibling) grid.previousElementSibling.style.display = 'block';
+    
+    let leftColHtml = ''; let rightColHtml = '';
+    similar.forEach((p, index) => {
+        const cardHtml = `<a href="product.html?id=${p.id}" class="product-card">
+            <img src="${p.images[0]}" alt="${p.name}">
+            <div class="p-details"><div class="p-title">${p.name}</div><div><span class="p-price">৳ ${p.price}</span></div></div>
+        </a>`;
+        if (index % 2 === 0) leftColHtml += cardHtml; else rightColHtml += cardHtml;
+    });
+    grid.innerHTML = `<div class="masonry-col">${leftColHtml}</div><div class="masonry-col">${rightColHtml}</div>`;
+}
+
+
+
+
+// --- 4. CART PROTECTION & SUBMISSION ---
+function confirmSelection() {
+    // PROTECTION: Check if required variants exist but aren't selected yet
+    if (currentProduct.colors && currentProduct.colors.length > 0 && !selectedVariant.color) {
+        showToast("Please select a Color", false); 
+        return;
+    }
+    if (currentProduct.sizes && currentProduct.sizes.length > 0 && !selectedVariant.size) {
+        showToast("Please select a Size", false); 
+        return;
+    }
+
+    addToCart(currentProduct, selectedVariant);
+
+    if (currentAction === 'buy') {
+        window.location.href = 'checkout.html';
+    } else {
+        showToast("Added to Cart Successfully!", true);
+        closeModal();
+    }
+}
+
+// Run on load
+loadDetails();
+
+// ADD THE NEW CODE RIGHT HERE ↓
+window.addEventListener('pageshow', function(event) {
+    if (event.persisted) {
+        window.location.reload();
+    }
+});
+</script>
+</body>
+</html>
