@@ -99,15 +99,15 @@
 
 <!-- STATUS TABS (Called renamed to Confirmed) -->
 <!-- TOP FILTERS -->
-<div class="flex overflow-x-auto hide-scrollbar px-4 pb-3 pt-3 gap-2 border-b" id="status-filters">
-    <button onclick="setStatusFilter('All')" class="filter-btn active-filter shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-orange-500 text-white shadow-md transition">All</button>
-    <button onclick="setStatusFilter('New')" class="filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border transition">New</button>
-    <button onclick="setStatusFilter('Confirmed')" class="filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border transition">Confirmed</button>
-    <button onclick="setStatusFilter('Shipped')" class="filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border transition">Shipped</button>
-    <button onclick="setStatusFilter('Delivered')" class="filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border transition">Delivered</button>
-    <button onclick="setStatusFilter('Failed Delivery')" class="filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border transition">Failed Delivery</button>
-    <button onclick="setStatusFilter('Canceled')" class="filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border transition">Canceled</button>
-</div>
+<!-- STATUS TABS -->
+        <div class="flex overflow-x-auto hide-scrollbar px-4 pb-3 pt-3 gap-2 border-b" id="status-filters">
+            <button onclick="setStatusFilter('All')" class="filter-btn active-filter shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-orange-500 text-white shadow-md transition">All</button>
+            <button onclick="setStatusFilter('Intake')" class="filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border transition hover:bg-gray-200">Intake</button>
+            <button onclick="setStatusFilter('Confirmed')" class="filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border transition hover:bg-gray-200">Confirmed</button>
+            <button onclick="setStatusFilter('Shipped')" class="filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border transition hover:bg-gray-200">Shipped</button>
+            <button onclick="setStatusFilter('Delivered')" class="filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border transition hover:bg-gray-200">Delivered</button>
+            <button onclick="setStatusFilter('Failed')" class="filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border transition hover:bg-gray-200">Failed</button>
+        </div>
 </div>
 
     <!-- ORDER LIST CONTAINER -->
