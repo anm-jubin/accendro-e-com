@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Order Manager</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <style>
     body { background-color: #e5e7eb; }
     .app-container { max-w-md; margin: 0 auto; background: #f3f4f6; min-height: 100vh; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
@@ -27,10 +26,12 @@
 <body class="text-gray-800">
     
     <!-- LOGIN SCREEN -->
+<!-- LOGIN SCREEN -->
 <div id="login-screen" class="fixed inset-0 bg-gray-100 z-[100] flex flex-col justify-center items-center px-4 transition-opacity duration-300 hidden">
     <div class="bg-white p-6 rounded-3xl shadow-xl w-full max-w-sm border border-gray-100 flex flex-col gap-4">
         <div class="text-center mb-2">
-            <i class="ri-lock-2-fill text-4xl text-orange-500 mb-2 inline-block"></i>
+            <!-- Offline SVG Lock -->
+            <svg class="w-10 h-10 text-orange-500 mb-2 inline-block" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C9.243 2 7 4.243 7 7v3H6c-1.103 0-2 .897-2 2v8c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-8c0-1.103-.897-2-2-2h-1V7c0-2.757-2.243-5-5-5zm-3 8V7c0-1.654 1.346-3 3-3s3 1.346 3 3v3H9zm3 7.5c-1.103 0-2-.897-2-2s.897-2 2-2 2 .897 2 2-.897 2-2 2z"></path></svg>
             <h1 class="text-xl font-black text-gray-800">Admin Login</h1>
             <p class="text-xs text-gray-500 mt-1">Enter your password to access orders</p>
         </div>
@@ -38,7 +39,9 @@
         <div class="relative">
             <input type="password" id="pw-input" placeholder="Password" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-orange-500 transition pr-10" onkeypress="if(event.key === 'Enter') attemptLogin()">
             <button onclick="togglePw()" class="absolute right-3 top-3 text-gray-400 hover:text-gray-600 active:scale-95 transition">
-                <i id="pw-eye" class="ri-eye-off-line text-lg"></i>
+                <!-- Offline SVG Eye Toggle -->
+                <svg id="pw-eye-off" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.29 3.29m0 0a10.05 10.05 0 015.424-1.284c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>
+                <svg id="pw-eye-on" class="w-5 h-5 hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
             </button>
         </div>
         
@@ -53,59 +56,45 @@
 <div class="app-container max-w-md mx-auto flex flex-col">
 
     <!-- HEADER & SEARCH -->
-    <div class="bg-white shadow-sm sticky top-0 z-20">
-        <div class="p-4 pb-2 flex justify-between items-center">
-            <h1 class="font-bold text-lg text-orange-600 flex items-center gap-2">
-                <i class="ri-dashboard-2-line"></i> Orders
-            </h1>
-<button id="refresh-btn" onclick="fetchData(true)" class="text-gray-500 hover:text-orange-500 flex items-center gap-1 text-sm bg-gray-100 px-3 py-1 rounded-full transition">
-    <i id="refresh-icon" class="ri-refresh-line"></i> <span id="refresh-text">Refresh</span>
-</button>
-        </div>
-        
-<div class="px-4 pb-2">
-    <div class="relative">
-        <i class="ri-search-line absolute left-3 top-2 text-gray-400"></i>
-        <input type="text" id="search" placeholder="Search phone, name, IP or ID..." class="w-full bg-gray-100 rounded-lg pl-9 pr-8 py-2 text-sm outline-none focus:ring-2 focus:ring-orange-200 transition" oninput="renderOrders()">
-        <!-- SVG Clear Button (Works Offline) -->
-        <svg id="clear-search" onclick="clearSearch()" class="absolute right-2.5 top-2 w-5 h-5 text-gray-400 hidden cursor-pointer hover:text-gray-600 active:scale-95 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-        </svg>
+<!-- HEADER & SEARCH -->
+<div class="bg-white shadow-sm sticky top-0 z-20">
+    <div class="p-4 pb-2 flex justify-between items-center">
+        <h1 class="font-bold text-lg text-orange-600 flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg> Orders
+        </h1>
+        <button id="refresh-btn" onclick="fetchData(true)" class="text-gray-500 hover:text-orange-500 flex items-center gap-1 text-sm bg-gray-100 px-3 py-1 rounded-full transition">
+            <svg id="refresh-icon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg> <span id="refresh-text">Refresh</span>
+        </button>
     </div>
-</div>
-
-        <!-- NEW: CALENDAR & SORTING CONTROLS -->
-        <div class="px-4 py-2 flex justify-between items-center bg-gray-50 border-t border-b">
-            <div class="flex items-center gap-1.5 text-xs">
-                <i class="ri-calendar-line text-gray-400"></i>
-                <select id="group-select" class="bg-transparent font-bold text-gray-700 outline-none cursor-pointer" onchange="changeGroup(this.value)">
-                    <option value="Daily">Daily View</option>
-                    <option value="Weekly">Weekly View</option>
-                    <option value="Monthly">Monthly View</option>
-                </select>
-            </div>
-            <div class="flex items-center gap-1.5 text-xs">
-                <i class="ri-sort-desc text-gray-400"></i>
-                <select id="sort-select" class="bg-transparent font-bold text-gray-700 outline-none cursor-pointer text-right" onchange="changeSort(this.value)">
-                    <option value="Time">Sort: Newest Time</option>
-                    <option value="Stage">Sort: Order Stage</option>
-                </select>
-            </div>
+    
+    <div class="px-4 pb-2">
+        <div class="relative">
+            <svg class="w-4 h-4 absolute left-3 top-2.5 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            <input type="text" id="search" placeholder="Search phone, name, IP or ID..." class="w-full bg-gray-100 rounded-lg pl-9 pr-8 py-2 text-sm outline-none focus:ring-2 focus:ring-orange-200 transition" oninput="renderOrders()">
+            <!-- SVG Clear Button (Works Offline) -->
+            <svg id="clear-search" onclick="clearSearch()" class="absolute right-2.5 top-2 w-5 h-5 text-gray-400 hidden cursor-pointer hover:text-gray-600 active:scale-95 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
         </div>
+    </div>
 
-        <!-- STATUS TABS (Called renamed to Confirmed) -->
-        <!-- TOP FILTERS -->
-<div class="flex overflow-x-auto hide-scrollbar px-4 pb-3 pt-3 gap-2 border-b" id="status-filters">
-    <button onclick="setStatusFilter('All')" class="filter-btn active-filter shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-orange-500 text-white shadow-md transition">All</button>
-    <button onclick="setStatusFilter('New')" class="filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border transition hover:bg-gray-200">New</button>
-    <button onclick="setStatusFilter('Confirmed')" class="filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border transition hover:bg-gray-200">Confirmed</button>
-    <button onclick="setStatusFilter('Shipped')" class="filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border transition hover:bg-gray-200">Shipped</button>
-    <button onclick="setStatusFilter('Delivered')" class="filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border transition hover:bg-gray-200">Delivered</button>
-    <button onclick="setStatusFilter('Failed Delivery')" class="filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border transition hover:bg-gray-200">Failed Delivery</button>
-    <button onclick="setStatusFilter('Canceled')" class="filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border transition hover:bg-gray-200">Canceled</button>
-</div>
-
-
+    <!-- CALENDAR & SORTING CONTROLS -->
+    <div class="px-4 py-2 flex justify-between items-center bg-gray-50 border-t border-b">
+        <div class="flex items-center gap-1.5 text-xs">
+            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+            <select id="group-select" class="bg-transparent font-bold text-gray-700 outline-none cursor-pointer" onchange="changeGroup(this.value)">
+                <option value="Daily">Daily View</option>
+                <option value="Weekly">Weekly View</option>
+                <option value="Monthly">Monthly View</option>
+            </select>
+        </div>
+        <div class="flex items-center gap-1.5 text-xs">
+            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"></path></svg>
+            <select id="sort-select" class="bg-transparent font-bold text-gray-700 outline-none cursor-pointer text-right" onchange="changeSort(this.value)">
+                <option value="Time">Sort: Newest Time</option>
+                <option value="Stage">Sort: Order Stage</option>
+            </select>
+        </div>
     </div>
 
     <!-- ORDER LIST CONTAINER -->
@@ -266,9 +255,10 @@
 
 
 <!-- FULLSCREEN IMAGE VIEWER -->
+<!-- FULLSCREEN IMAGE VIEWER -->
 <div id="image-viewer" class="fixed inset-0 bg-black z-[60] hidden flex items-center justify-center" onclick="this.classList.add('hidden')">
     <img id="viewer-img" src="" class="max-w-full max-h-full object-contain">
-    <i class="ri-close-line absolute top-4 right-4 text-white text-3xl cursor-pointer"></i>
+    <svg class="absolute top-4 right-4 w-8 h-8 text-white cursor-pointer hover:scale-110 transition" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
 </div>
 
 
@@ -292,36 +282,38 @@
     
 // === AUTHENTICATION LOGIC ===
     function togglePw() {
-        const input = document.getElementById('pw-input');
-        const eye = document.getElementById('pw-eye');
-        if (input.type === 'password') {
-            input.type = 'text';
-            eye.classList.replace('ri-eye-off-line', 'ri-eye-line');
-        } else {
-            input.type = 'password';
-            eye.classList.replace('ri-eye-line', 'ri-eye-off-line');
-        }
+    const input = document.getElementById('pw-input');
+    const eyeOn = document.getElementById('pw-eye-on');
+    const eyeOff = document.getElementById('pw-eye-off');
+    if (input.type === 'password') {
+        input.type = 'text';
+        eyeOff.classList.add('hidden');
+        eyeOn.classList.remove('hidden');
+    } else {
+        input.type = 'password';
+        eyeOn.classList.add('hidden');
+        eyeOff.classList.remove('hidden');
     }
+}
 
     async function attemptLogin() {
-        const pw = document.getElementById('pw-input').value;
-        if(!pw) return;
-        
-        const btn = document.getElementById('login-btn');
-        document.getElementById('login-error').classList.add('hidden');
-        
-        btn.innerHTML = `<i class="ri-loader-4-line animate-spin text-lg"></i> Authenticating...`;
-        btn.disabled = true;
-
-        adminPassword = pw;
-        await fetchData(true, true); // Force fetch to verify new password immediately
-        
-        // Reset button if login failed
-        if(!adminPassword) {
-            btn.innerHTML = `<span>Access Orders</span>`;
-            btn.disabled = false;
-        }
+    const pw = document.getElementById('pw-input').value;
+    if (!pw) return;
+    
+    const btn = document.getElementById('login-btn');
+    document.getElementById('login-error').classList.add('hidden');
+    
+    btn.innerHTML = `<svg class="animate-spin w-5 h-5 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Authenticating...`;
+    btn.disabled = true;
+    
+    adminPassword = pw;
+    await fetchData(true, true);
+    
+    if (!adminPassword) {
+        btn.innerHTML = `<span>Access Orders</span>`;
+        btn.disabled = false;
     }
+}
 
 function changeGroup(val) { currentGroupBy = val; localStorage.setItem('admin_group', val); renderOrders(); }
     function changeSort(val) { currentSortBy = val; localStorage.setItem('admin_sort', val); renderOrders(); }
@@ -354,80 +346,82 @@ function changeGroup(val) { currentGroupBy = val; localStorage.setItem('admin_gr
     });
 
 async function fetchData(force = false, isManualLogin = false) {
-    if (!adminPassword) return; // Prevent fetch if no password
-    
-    const now = Date.now();
-    const lastFetch = localStorage.getItem(TIME_KEY) || 0;
-    const container = document.getElementById('order-container');
-    
-    // Use cache if not forced (like manual refresh or login) and less than 60s
-    if (!force && (now - lastFetch < 60000) && allOrders.length > 0) return;
-    
-    if (allOrders.length === 0 && !isManualLogin) {
-        container.innerHTML = `<div class="text-center text-gray-400 mt-10"><i class="ri-loader-4-line animate-spin text-3xl"></i><p class="text-sm mt-2">Connecting to Sheets...</p></div>`;
-    }
-    
-    const refreshIcon = document.getElementById('refresh-icon');
-    if (refreshIcon) refreshIcon.classList.add('animate-spin');
-    
-    try {
-        // Pass dynamic password to API
-        const res = await fetch(`${GOOGLE_SCRIPT_URL}?pw=${encodeURIComponent(adminPassword)}`);
+        if (!adminPassword) return; 
         
-        if (res.ok) {
-            const data = await res.json();
+        const now = Date.now();
+        const lastFetch = localStorage.getItem(TIME_KEY) || 0;
+        const container = document.getElementById('order-container');
+        
+        if (!force && (now - lastFetch < 60000) && allOrders.length > 0) return;
+
+        if (allOrders.length === 0 && !isManualLogin) {
+            container.innerHTML = `<div class="text-center text-gray-400 mt-10"><svg class="animate-spin w-8 h-8 mx-auto mb-2 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><p class="text-sm mt-2">Connecting to Data...</p></div>`;
+        }
+        
+        const refreshIcon = document.getElementById('refresh-icon');
+        if(refreshIcon) refreshIcon.classList.add('animate-spin');
+
+        try {
+            const res = await fetch(`${GOOGLE_SCRIPT_URL}?pw=${encodeURIComponent(adminPassword)}`); 
             
-            // 1. Check if Google Script rejected the password
-            if (data.error === "Unauthorized access") {
-                throw new Error("unauth");
-            }
-            
-            // 2. Successful Manual Login
-            if (isManualLogin) {
-                localStorage.setItem('admin_pw', adminPassword); // Save for next time
-                document.getElementById('login-screen').classList.add('hidden');
+            if (res.ok) {
+                const data = await res.json();
                 
-                // Render cache immediately if we haven't already
-                const cachedData = localStorage.getItem(CACHE_KEY);
-                if (cachedData && allOrders.length === 0) {
-                    try { allOrders = JSON.parse(cachedData);
-                        renderOrders(); } catch (e) {}
+                if (data.error === "Unauthorized access") throw new Error("unauth");
+
+                if (isManualLogin) {
+                    localStorage.setItem('admin_pw', adminPassword); 
+                    document.getElementById('login-screen').classList.add('hidden');
+                    const cachedData = localStorage.getItem(CACHE_KEY);
+                    if (cachedData && allOrders.length === 0) {
+                        try { allOrders = JSON.parse(cachedData); renderOrders(); } catch(e){}
+                    }
+                }
+                
+                const fetchedOrders = Array.isArray(data) ? data.reverse() :[];
+                
+                if (document.activeElement.id !== 'modal-admin-note') {
+                    allOrders = fetchedOrders;
+                    localStorage.setItem(CACHE_KEY, JSON.stringify(allOrders));
+                    localStorage.setItem(TIME_KEY, Date.now());
+                    renderOrders();
                 }
             }
-            
-            const fetchedOrders = Array.isArray(data) ? data.reverse() : [];
-            
-            // Smart cache update (don't update if currently typing a note)
-            if (document.activeElement.id !== 'modal-admin-note') {
-                allOrders = fetchedOrders;
-                localStorage.setItem(CACHE_KEY, JSON.stringify(allOrders));
-                localStorage.setItem(TIME_KEY, Date.now());
-                renderOrders();
-            }
-        } else if (allOrders.length === 0) {
-            container.innerHTML = `<p class="text-center text-red-500 mt-10">Failed to load data.</p>`;
-        }
-    } catch (err) {
-        if (err.message === "unauth") {
-            // Wipe bad password & show error
-            adminPassword = '';
-            localStorage.removeItem('admin_pw');
-            document.getElementById('login-screen').classList.remove('hidden');
-            
-            if (isManualLogin) {
-                document.getElementById('login-error').classList.remove('hidden');
+        } catch (err) {
+            if (err.message === "unauth") {
+                adminPassword = '';
+                localStorage.removeItem('admin_pw');
+                document.getElementById('login-screen').classList.remove('hidden');
+                
+                if (isManualLogin) {
+                    document.getElementById('login-error').classList.remove('hidden');
+                } else {
+                    alert("Session expired or password changed. Please log in again.");
+                    container.innerHTML = `<div class="text-center text-gray-400 mt-10"><svg class="w-8 h-8 mx-auto text-gray-400 mb-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg><p class="text-sm">Please log in.</p></div>`;
+                }
             } else {
-                // Password was changed on server while user was browsing
-                alert("Session expired or password changed. Please log in again.");
-                container.innerHTML = `<div class="text-center text-gray-400 mt-10"><i class="ri-lock-2-line text-3xl"></i><p class="text-sm mt-2">Please log in.</p></div>`;
+                // TRUE OFFLINE PROTECTION
+                if (allOrders.length === 0) {
+                    container.innerHTML = `<div class="text-center text-red-500 mt-10"><svg class="w-8 h-8 mx-auto mb-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 5.636a9 9 0 010 12.728m0 0l-2.829-2.829m2.829 2.829L21 21M15.536 8.464a5 5 0 010 7.072m0 0l-2.829-2.829m-4.243-4.243a4.978 4.978 0 014.243-1.414M5.636 5.636a9 9 0 000 12.728m0 0l2.829-2.829m-2.829 2.829L3 21M8.464 8.464a5 5 0 000 7.072m0 0l2.829-2.829m4.243 4.243a4.978 4.978 0 01-4.243 1.414"></path></svg><p>Offline. No cached data.</p></div>`;
+                } else {
+                    // Update header UI to show offline mode, DO NOT WIPE orders
+                    renderOrders(); // Re-ensure list is visible
+                    const refreshBtn = document.getElementById('refresh-btn');
+                    const refreshText = document.getElementById('refresh-text');
+                    if(refreshBtn && refreshText) {
+                        refreshText.innerText = 'Offline';
+                        refreshBtn.classList.add('text-red-500', 'bg-red-50');
+                        setTimeout(() => {
+                            refreshText.innerText = 'Refresh';
+                            refreshBtn.classList.remove('text-red-500', 'bg-red-50');
+                        }, 3000);
+                    }
+                }
             }
-        } else {
-            if (allOrders.length === 0) container.innerHTML = `<p class="text-center text-red-500 mt-10">Network error.</p>`;
+        } finally {
+            if(refreshIcon) refreshIcon.classList.remove('animate-spin');
         }
-    } finally {
-        if (refreshIcon) refreshIcon.classList.remove('animate-spin');
     }
-}
 
     // === AUTO-SAVE LOGIC ===
     function autoSaveTrigger() {
@@ -449,32 +443,35 @@ async function fetchData(force = false, isManualLogin = false) {
 }
 
     async function performSync() {
-        if (selectedOrderIndex === null) return;
-        const indicator = document.getElementById('sync-indicator');
-        indicator.innerText = "Syncing...";
-        indicator.className = "text-[10px] font-bold text-blue-500";
-
-        const order = allOrders.find(o => o.rowIndex === selectedOrderIndex);
-        const payload = { 
-            pw: "my_admin_password_123", 
-            rowIndex: selectedOrderIndex, 
-            status: order.Status,
-            adminNote: order.Admin_Note 
-        };
-
-        try {
-            await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
-            indicator.innerText = "Saved to Cloud ✓";
-            indicator.className = "text-[10px] font-bold text-green-600";
-            setTimeout(() => { 
-                if(indicator.innerText.includes("Saved")) indicator.innerText = "Saved"; 
-                indicator.className = "text-[10px] font-bold text-gray-400 italic";
-            }, 3000);
-        } catch (err) {
-            indicator.innerText = "Offline - Saved Locally";
-            indicator.className = "text-[10px] font-bold text-red-500";
-        }
+    if (selectedOrderIndex === null) return;
+    const indicator = document.getElementById('sync-indicator');
+    indicator.innerText = "Syncing...";
+    indicator.className = "text-[10px] font-bold text-blue-500";
+    
+    const order = allOrders.find(o => o.rowIndex === selectedOrderIndex);
+    
+    // SECURITY FIX: Replaced hardcoded password with the variable stored in memory 
+    // during a successful login.
+    const payload = {
+        pw: adminPassword,
+        rowIndex: selectedOrderIndex,
+        status: order.Status,
+        adminNote: order.Admin_Note
+    };
+    
+    try {
+        await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+        indicator.innerText = "Saved to Cloud ✓";
+        indicator.className = "text-[10px] font-bold text-green-600";
+        setTimeout(() => {
+            if (indicator.innerText.includes("Saved")) indicator.innerText = "Saved";
+            indicator.className = "text-[10px] font-bold text-gray-400 italic";
+        }, 3000);
+    } catch (err) {
+        indicator.innerText = "Offline - Saved Locally";
+        indicator.className = "text-[10px] font-bold text-red-500";
     }
+}
 
     // === HELPERS ===
     function formatCustomDate(d) {
@@ -551,7 +548,6 @@ async function fetchData(force = false, isManualLogin = false) {
         const searchInput = document.getElementById('search');
         const searchVal = searchInput.value.toLowerCase();
         
-        // HIGHLIGHT SEARCH BOX IF ACTIVE
         if (searchVal) {
             searchInput.classList.remove('bg-gray-100');
             searchInput.classList.add('bg-orange-100', 'ring-2', 'ring-orange-400', 'text-orange-900', 'shadow-sm', 'font-bold');
@@ -560,7 +556,6 @@ async function fetchData(force = false, isManualLogin = false) {
             searchInput.classList.remove('bg-orange-100', 'ring-2', 'ring-orange-400', 'text-orange-900', 'shadow-sm', 'font-bold');
         }
         
-        // Show/hide clear search button
         const clearBtn = document.getElementById('clear-search');
         if(clearBtn) clearBtn.style.display = searchVal ? 'block' : 'none';
 
@@ -582,7 +577,8 @@ async function fetchData(force = false, isManualLogin = false) {
         });
 
         if (filtered.length === 0) {
-            container.innerHTML = `<div class="text-center text-gray-400 mt-10"><i class="ri-file-search-line text-3xl"></i><p class="text-sm mt-2">No orders found.</p></div>`;
+            // Replaced missing icon with inline SVG
+            container.innerHTML = `<div class="text-center text-gray-400 mt-10"><svg class="w-8 h-8 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m5.231 13.481L15 17.25m-4.5-15H5.625c-.621 0-1.125.504-1.125 1.125v16.5c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9zm3.75 11.625a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"></path></svg><p class="text-sm">No orders found.</p></div>`;
             return;
         }
 
@@ -697,8 +693,9 @@ async function fetchData(force = false, isManualLogin = false) {
     const dupInfo = getDuplicateInfo(order);
     const dupWarn = document.getElementById('modal-dup-warning');
     if (dupInfo.msg) {
+        // Replaced warning icon with inline SVG
         dupWarn.innerHTML = `<div class="bg-red-50 border border-red-200 text-red-700 p-3 rounded-xl text-xs font-bold flex items-center justify-between gap-2 shadow-sm">
-                <span><i class="ri-error-warning-fill text-lg align-middle mr-1"></i> ${dupInfo.msg.toUpperCase()}</span>
+                <span><svg class="w-4 h-4 inline-block align-middle mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg> ${dupInfo.msg.toUpperCase()}</span>
                 <span class="bg-red-600 text-white px-2 py-1 rounded text-[9px]">VIEW</span>
             </div>`;
         dupWarn.onclick = (e) => filterDuplicates(e, dupInfo.searchTarget);
@@ -710,7 +707,7 @@ async function fetchData(force = false, isManualLogin = false) {
     let st = order.Status || 'New';
     if (st === 'Intake') st = 'New';
     document.getElementById('modal-status-select').value = st;
-    updateModalStatusColor(); // Sets Color Dropdown
+    updateModalStatusColor();
     document.getElementById('modal-admin-note').value = order.Admin_Note || '';
     
     const imgs = (order.Image_Links || "").split('\n\n').filter(i => i.trim());
