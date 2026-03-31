@@ -7,13 +7,22 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
     <style>
-        body { background-color: #e5e7eb; }
-        .app-container { max-w-md; margin: 0 auto; background: #f3f4f6; min-height: 100vh; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
-        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .slide-up { animation: slideUp 0.3s ease-out forwards; }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-    </style>
+    body { background-color: #e5e7eb; }
+    .app-container { max-w-md; margin: 0 auto; background: #f3f4f6; min-height: 100vh; position: relative; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    
+    /* NEW: Hardware Accelerated Animation to stop lag on live servers */
+    .slide-up { 
+        animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; 
+        will-change: transform;
+        backface-visibility: hidden;
+    }
+    @keyframes slideUp { 
+        from { transform: translate3d(0, 100%, 0); } 
+        to { transform: translate3d(0, 0, 0); } 
+    }
+</style>
 </head>
 <body class="text-gray-800">
     
@@ -87,14 +96,16 @@
         <!-- STATUS TABS (Called renamed to Confirmed) -->
         <!-- TOP FILTERS -->
 <div class="flex overflow-x-auto hide-scrollbar px-4 pb-3 pt-3 gap-2 border-b" id="status-filters">
-    <button onclick="setStatusFilter('All')" class="filter-btn active-filter shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-800 text-white transition">All</button>
-    <button onclick="setStatusFilter('New')" class="filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border transition">New</button>
-    <button onclick="setStatusFilter('Confirmed')" class="filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border transition">Confirmed</button>
-    <button onclick="setStatusFilter('Shipped')" class="filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border transition">Shipped</button>
-    <button onclick="setStatusFilter('Delivered')" class="filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border transition">Delivered</button>
-    <button onclick="setStatusFilter('Failed Delivery')" class="filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border transition">Failed Delivery</button>
-    <button onclick="setStatusFilter('Canceled')" class="filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border transition">Canceled</button>
+    <button onclick="setStatusFilter('All')" class="filter-btn active-filter shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-orange-500 text-white shadow-md transition">All</button>
+    <button onclick="setStatusFilter('New')" class="filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border transition hover:bg-gray-200">New</button>
+    <button onclick="setStatusFilter('Confirmed')" class="filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border transition hover:bg-gray-200">Confirmed</button>
+    <button onclick="setStatusFilter('Shipped')" class="filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border transition hover:bg-gray-200">Shipped</button>
+    <button onclick="setStatusFilter('Delivered')" class="filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border transition hover:bg-gray-200">Delivered</button>
+    <button onclick="setStatusFilter('Failed Delivery')" class="filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border transition hover:bg-gray-200">Failed Delivery</button>
+    <button onclick="setStatusFilter('Canceled')" class="filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border transition hover:bg-gray-200">Canceled</button>
 </div>
+
+
     </div>
 
     <!-- ORDER LIST CONTAINER -->
@@ -126,13 +137,15 @@
         <div class="flex items-center gap-2">
             <span id="modal-order-id" class="block text-sm font-black text-gray-800"></span>
             <button onclick="copyText('modal-order-id', 'Order ID')" class="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 active:scale-95 shrink-0">
-                <i class="ri-file-copy-line text-[10px]"></i>
+                <!-- Offline SVG Copy Icon -->
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
             </button>
         </div>
         <span id="modal-date" class="block text-[10px] text-gray-400 font-bold mt-0.5"></span>
     </div>
-    <button onclick="closeDetails()" class="bg-gray-100 text-gray-500 rounded-full w-9 h-9 flex items-center justify-center hover:bg-gray-200">
-        <i class="ri-close-line text-2xl"></i>
+    <button onclick="closeDetails()" class="bg-gray-100 text-gray-500 rounded-full w-9 h-9 flex items-center justify-center hover:bg-gray-200 active:scale-95 transition">
+        <!-- Offline SVG Close Icon -->
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
     </button>
 </div>
         
@@ -164,46 +177,60 @@
 
 
             <!-- Customer Details Layout -->
-            <div class="bg-white p-4 rounded-2xl shadow-sm border mb-2 space-y-4">
-                <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest border-b pb-1">Customer Details</h3>
-                
-                <!-- Name Row with Copy -->
-                <div class="flex justify-between items-end">
-                    <div class="flex flex-col flex-1 pr-2">
-                        <span class="text-[10px] font-bold text-gray-400 uppercase">Name:</span>
-                        <span class="text-lg font-bold text-gray-800 leading-tight" id="modal-name"></span>
-                    </div>
-                    <button onclick="copyText('modal-name', 'Name')" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 active:scale-95 shrink-0"><i class="ri-file-copy-line"></i></button>
-                </div>
-                
-                <!-- Phone Row with Copy & Call -->
-                <div class="flex justify-between items-end">
-                    <div class="flex flex-col">
-                        <span class="text-[10px] font-bold text-gray-400 uppercase">Phone Number:</span>
-                        <span class="text-lg font-bold text-blue-600 leading-tight" id="modal-phone"></span>
-                    </div>
-                    <div class="flex items-center gap-2 mb-1">
-                        <a href="#" id="btn-call" class="h-8 px-4 bg-green-500 text-white rounded-full text-xs font-bold flex items-center gap-1 shadow-sm active:scale-95"><i class="ri-phone-fill"></i> CALL</a>
-                        <button onclick="copyText('modal-phone', 'Phone Number')" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 active:scale-95"><i class="ri-file-copy-line"></i></button>
-                        
-                    </div>
-                </div>
-                
-                <!-- Address Row with Copy -->
-                <div class="flex justify-between items-end">
-                    <div class="flex flex-col flex-1 pr-2">
-                        <span class="text-[10px] font-bold text-gray-400 uppercase">Delivery Address:</span>
-                        <span class="text-sm text-gray-700 font-medium leading-relaxed mt-1" id="modal-address"></span>
-                    </div>
-                    <button onclick="copyText('modal-address', 'Address')" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 active:scale-95 shrink-0"><i class="ri-file-copy-line"></i></button>
-                </div>
-                
-                <!-- Special Message (Order Note) -->
-                <div id="modal-note-container" class="bg-orange-50 p-3 rounded-xl border border-orange-100 hidden">
-                    <span class="text-[10px] font-bold text-orange-400 uppercase block mb-1">Special Message from Customer</span>
-                    <p class="text-sm text-orange-900 font-medium" id="modal-note"></p>
-                </div>
-            </div>
+            <!-- Customer Details Layout -->
+<div class="bg-white p-4 rounded-2xl shadow-sm border mb-2 space-y-4">
+    <h3 class="text-[10px] font-black text-gray-400 uppercase tracking-widest border-b pb-1">Customer Details</h3>
+    
+    <!-- Name Row with Copy -->
+    <div class="flex justify-between items-end">
+        <div class="flex flex-col flex-1 pr-2">
+            <span class="text-[10px] font-bold text-gray-400 uppercase">Name:</span>
+            <span class="text-lg font-bold text-gray-800 leading-tight" id="modal-name"></span>
+        </div>
+        <button onclick="copyText('modal-name', 'Name')" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 active:scale-95 shrink-0">
+            <!-- Offline SVG Copy Icon -->
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+        </button>
+    </div>
+    
+    <!-- Phone Row with Copy & Call -->
+    <div class="flex justify-between items-end">
+        <div class="flex flex-col">
+            <span class="text-[10px] font-bold text-gray-400 uppercase">Phone Number:</span>
+            <span class="text-lg font-bold text-blue-600 leading-tight" id="modal-phone"></span>
+        </div>
+        <div class="flex items-center gap-2 mb-1">
+            <a href="#" id="btn-call" class="h-8 px-4 bg-green-500 text-white rounded-full text-xs font-bold flex items-center gap-1 shadow-sm active:scale-95">
+                <!-- Offline SVG Phone Icon -->
+                <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M9.366 10.682a10.556 10.556 0 003.952 3.952l1.3-1.3a2 2 0 012.333-.426l3.5.15a2 2 0 011.849 1.996v2.943a2 2 0 01-2.148 1.995 16.035 16.035 0 01-14.15-14.15 2 2 0 011.995-2.148h2.943a2 2 0 011.996 1.849l.15 3.5a2 2 0 01-.426 2.333l-1.3 1.3z"/></svg> 
+                CALL
+            </a>
+            <button onclick="copyText('modal-phone', 'Phone Number')" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 active:scale-95">
+                <!-- Offline SVG Copy Icon -->
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </button>
+            
+        </div>
+    </div>
+    
+    <!-- Address Row with Copy -->
+    <div class="flex justify-between items-end">
+        <div class="flex flex-col flex-1 pr-2">
+            <span class="text-[10px] font-bold text-gray-400 uppercase">Delivery Address:</span>
+            <span class="text-sm text-gray-700 font-medium leading-relaxed mt-1" id="modal-address"></span>
+        </div>
+        <button onclick="copyText('modal-address', 'Address')" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-500 active:scale-95 shrink-0">
+            <!-- Offline SVG Copy Icon -->
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+        </button>
+    </div>
+    
+    <!-- Special Message (Order Note) -->
+    <div id="modal-note-container" class="bg-orange-50 p-3 rounded-xl border border-orange-100 hidden">
+        <span class="text-[10px] font-bold text-orange-400 uppercase block mb-1">Special Message from Customer</span>
+        <p class="text-sm text-orange-900 font-medium" id="modal-note"></p>
+    </div>
+</div>
             
             <!-- Security / IP Info (Basic Light Gray) -->
 <div class="m-4">
@@ -403,21 +430,22 @@
 
     // === AUTO-SAVE LOGIC ===
     function autoSaveTrigger() {
-        const indicator = document.getElementById('sync-indicator');
-        indicator.innerText = "Typing...";
-        indicator.className = "text-[10px] font-bold text-orange-500";
-
-        const order = allOrders.find(o => o.rowIndex === selectedOrderIndex);
-        if (order) {
-            order.Status = document.getElementById('modal-status-select').value;
-            order.Admin_Note = document.getElementById('modal-admin-note').value;
-            localStorage.setItem(CACHE_KEY, JSON.stringify(allOrders));
-            renderOrders();
-        }
-
-        clearTimeout(saveTimeout);
-        saveTimeout = setTimeout(performSync, 1500);
+    updateModalStatusColor(); // Updates Color visually immediately 
+    const indicator = document.getElementById('sync-indicator');
+    indicator.innerText = "Typing...";
+    indicator.className = "text-[10px] font-bold text-orange-500";
+    
+    const order = allOrders.find(o => o.rowIndex === selectedOrderIndex);
+    if (order) {
+        order.Status = document.getElementById('modal-status-select').value;
+        order.Admin_Note = document.getElementById('modal-admin-note').value;
+        localStorage.setItem(CACHE_KEY, JSON.stringify(allOrders));
+        renderOrders();
     }
+    
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(performSync, 1500);
+}
 
     async function performSync() {
         if (selectedOrderIndex === null) return;
@@ -463,16 +491,16 @@
     }
 
     function setStatusFilter(status) {
-        currentFilter = status;
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            if(btn.innerText === status) {
-                btn.className = 'filter-btn active-filter shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-800 text-white transition';
-            } else {
-                btn.className = 'filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border transition';
-            }
-        });
-        renderOrders();
-    }
+    currentFilter = status;
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        if (btn.innerText === status) {
+            btn.className = 'filter-btn active-filter shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-orange-500 text-white shadow-md transition';
+        } else {
+            btn.className = 'filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border transition hover:bg-gray-200';
+        }
+    });
+    renderOrders();
+}
 
     function clearSearch() {
         document.getElementById('search').value = '';
@@ -519,7 +547,17 @@
 // === RENDERING UI ===
     function renderOrders() {
         const container = document.getElementById('order-container');
-        const searchVal = document.getElementById('search').value.toLowerCase();
+        const searchInput = document.getElementById('search');
+        const searchVal = searchInput.value.toLowerCase();
+        
+        // HIGHLIGHT SEARCH BOX IF ACTIVE
+        if (searchVal) {
+            searchInput.classList.remove('bg-gray-100');
+            searchInput.classList.add('bg-orange-100', 'ring-2', 'ring-orange-400', 'text-orange-900', 'shadow-sm', 'font-bold');
+        } else {
+            searchInput.classList.add('bg-gray-100');
+            searchInput.classList.remove('bg-orange-100', 'ring-2', 'ring-orange-400', 'text-orange-900', 'shadow-sm', 'font-bold');
+        }
         
         // Show/hide clear search button
         const clearBtn = document.getElementById('clear-search');
@@ -548,7 +586,7 @@
         }
 
         const groups = {}; const groupKeys =[];
-        const today = new Date(); // Get current date
+        const today = new Date(); 
 
         filtered.forEach(order => {
             let key = "Unknown Date"; 
@@ -556,7 +594,6 @@
             
             if (!isNaN(d.getTime())) {
                 if (currentGroupBy === 'Daily') {
-                    // Check if the order date matches today's date
                     const isToday = d.getDate() === today.getDate() && 
                                     d.getMonth() === today.getMonth() && 
                                     d.getFullYear() === today.getFullYear();
@@ -583,7 +620,6 @@
                 return new Date(b.Timestamp).getTime() - new Date(a.Timestamp).getTime();
             });
 
-            // Make "Today" visually distinct (orange text) if you want, or just standard
             const isTodayHeader = key === "Today";
             const headerColor = isTodayHeader ? "text-orange-500 font-black" : "text-gray-400 font-bold";
 
@@ -595,8 +631,9 @@
                 const dupInfo = getDuplicateInfo(order);
                 
                 let statusColor = 'bg-gray-100 text-gray-600';
-                if(order.Status === 'Intake') statusColor = 'bg-orange-100 text-orange-700 border-orange-200';
+                if(order.Status === 'Intake' || order.Status === 'New') statusColor = 'bg-orange-100 text-orange-700 border-orange-200';
                 if(order.Status === 'Confirmed') statusColor = 'bg-blue-100 text-blue-700 border-blue-200';
+                if(order.Status === 'Shipped') statusColor = 'bg-purple-100 text-purple-700 border-purple-200';
                 if(order.Status === 'Delivered') statusColor = 'bg-green-100 text-green-700 border-green-200';
                 if(order.Status === 'Failed Delivery' || order.Status === 'Canceled') statusColor = 'bg-red-100 text-red-700 border-red-200';
 
@@ -612,7 +649,7 @@
                         </div>
 
                         <div class="shrink-0 flex flex-col items-center justify-center pl-2">
-                            <span class="text-[10px] px-2.5 py-1.5 rounded-lg font-black tracking-wide border shadow-sm ${statusColor}">${order.Status || 'Intake'}</span>
+                            <span class="text-[10px] px-2.5 py-1.5 rounded-lg font-black tracking-wide border shadow-sm ${statusColor}">${order.Status || 'New'}</span>
                         </div>
                     </div>
                     ${dupInfo.msg ? `<div class="mt-2 text-[9px] bg-red-50 text-red-600 px-2 py-1 rounded border border-red-200 inline-block font-bold active:bg-red-100 transition self-start" onclick="filterDuplicates(event, '${dupInfo.searchTarget}')">⚠️ ${dupInfo.msg}</div>` : ''}
@@ -624,76 +661,83 @@
 
     // === MODAL UI LOGIC ===
     function openDetails(rowIndex) {
-        const order = allOrders.find(o => o.rowIndex === rowIndex);
-        if(!order) return;
-        selectedOrderIndex = rowIndex;
-
-        document.getElementById('modal-order-id').innerText = order.Order_ID || 'N/A';
-        document.getElementById('modal-name').innerText = order.Customer_Name;
-        document.getElementById('modal-phone').innerText = order.Phone;
-        document.getElementById('modal-address').innerText = order.Address;
-        
-        document.getElementById('modal-subtotal').innerText = order.Subtotal || order.Subtotal_Price || '0';
-        document.getElementById('modal-total').innerText = order.Total_Price || '0';
-        
-        document.getElementById('modal-items').innerHTML = (order.Order_Details || "").replace(/\n/g, '<br>');
-        
-        // Blank raw IP data from the sheet
-        document.getElementById('modal-ip-text').innerText = order.Security___IP_Info || "No IP Captured";
-
-        let dStr = "Unknown Date";
-        try { 
-            const d = new Date(order.Timestamp);
-            const time = d.toLocaleString('en-US', {hour:'numeric', minute:'2-digit'});
-            dStr = formatCustomDate(d) + " • " + time; 
-        } catch(e){}
-        document.getElementById('modal-date').innerText = dStr;
-
-        const noteContainer = document.getElementById('modal-note-container');
-        if (order.Order_Note && order.Order_Note !== "No Note" && order.Order_Note.trim() !== "") {
-            document.getElementById('modal-note').innerText = order.Order_Note;
-            noteContainer.classList.remove('hidden');
-        } else {
-            noteContainer.classList.add('hidden');
-        }
-
-        const dupInfo = getDuplicateInfo(order);
-        const dupWarn = document.getElementById('modal-dup-warning');
-        if (dupInfo.msg) {
-            dupWarn.innerHTML = `<div class="bg-red-50 border border-red-200 text-red-700 p-3 rounded-xl text-xs font-bold flex items-center justify-between gap-2 shadow-sm">
+    const order = allOrders.find(o => o.rowIndex === rowIndex);
+    if (!order) return;
+    selectedOrderIndex = rowIndex;
+    
+    document.getElementById('modal-order-id').innerText = order.Order_ID || 'N/A';
+    document.getElementById('modal-name').innerText = order.Customer_Name;
+    document.getElementById('modal-phone').innerText = order.Phone;
+    document.getElementById('modal-address').innerText = order.Address;
+    
+    document.getElementById('modal-subtotal').innerText = order.Subtotal || order.Subtotal_Price || '0';
+    document.getElementById('modal-total').innerText = order.Total_Price || '0';
+    
+    document.getElementById('modal-items').innerHTML = (order.Order_Details || "").replace(/\n/g, '<br>');
+    
+    document.getElementById('modal-ip-text').innerText = order.Security___IP_Info || "No IP Captured";
+    
+    let dStr = "Unknown Date";
+    try {
+        const d = new Date(order.Timestamp);
+        const time = d.toLocaleString('en-US', { hour: 'numeric', minute: '2-digit' });
+        dStr = formatCustomDate(d) + " • " + time;
+    } catch (e) {}
+    document.getElementById('modal-date').innerText = dStr;
+    
+    const noteContainer = document.getElementById('modal-note-container');
+    if (order.Order_Note && order.Order_Note !== "No Note" && order.Order_Note.trim() !== "") {
+        document.getElementById('modal-note').innerText = order.Order_Note;
+        noteContainer.classList.remove('hidden');
+    } else {
+        noteContainer.classList.add('hidden');
+    }
+    
+    const dupInfo = getDuplicateInfo(order);
+    const dupWarn = document.getElementById('modal-dup-warning');
+    if (dupInfo.msg) {
+        dupWarn.innerHTML = `<div class="bg-red-50 border border-red-200 text-red-700 p-3 rounded-xl text-xs font-bold flex items-center justify-between gap-2 shadow-sm">
                 <span><i class="ri-error-warning-fill text-lg align-middle mr-1"></i> ${dupInfo.msg.toUpperCase()}</span>
                 <span class="bg-red-600 text-white px-2 py-1 rounded text-[9px]">VIEW</span>
             </div>`;
-            dupWarn.onclick = (e) => filterDuplicates(e, dupInfo.searchTarget);
-            dupWarn.classList.remove('hidden');
-        } else {
-            dupWarn.classList.add('hidden');
-        }
-
-        document.getElementById('modal-status-select').value = order.Status || 'Intake';
-        document.getElementById('modal-admin-note').value = order.Admin_Note || '';
-
-        const imgs = (order.Image_Links || "").split('\n\n').filter(i => i.trim());
-        document.getElementById('modal-images').innerHTML = imgs.map((img, idx) => `
+        dupWarn.onclick = (e) => filterDuplicates(e, dupInfo.searchTarget);
+        dupWarn.classList.remove('hidden');
+    } else {
+        dupWarn.classList.add('hidden');
+    }
+    
+    let st = order.Status || 'New';
+    if (st === 'Intake') st = 'New';
+    document.getElementById('modal-status-select').value = st;
+    updateModalStatusColor(); // Sets Color Dropdown
+    document.getElementById('modal-admin-note').value = order.Admin_Note || '';
+    
+    const imgs = (order.Image_Links || "").split('\n\n').filter(i => i.trim());
+    document.getElementById('modal-images').innerHTML = imgs.map((img, idx) => `
             <div class="relative shrink-0">
                 <img src="${img}" decoding="async" class="w-24 h-24 object-cover border border-gray-200 rounded-xl cursor-pointer shadow-sm active:opacity-75 transition" onclick="viewImage('${img}')">
                 <span class="absolute top-1 left-1 bg-black/70 text-white text-[10px] font-black rounded-full w-5 h-5 flex items-center justify-center shadow-md backdrop-blur-sm border border-white/20">${idx + 1}</span>
             </div>
         `).join('') || '<p class="text-xs text-gray-300 italic">No images attached</p>';
-
-        const cleanPhone = String(order.Phone).replace(/[^0-9+]/g, '');
-        document.getElementById('btn-call').href = `tel:${cleanPhone}`;
-        // WhatsApp link removed entirely from JS
-
-        document.getElementById('detail-modal').classList.remove('hidden');
-        if(typeof initSwipeToClose === 'function') initSwipeToClose();
-    }
+    
+    const cleanPhone = String(order.Phone).replace(/[^0-9+]/g, '');
+    document.getElementById('btn-call').href = `tel:${cleanPhone}`;
+    
+    document.getElementById('detail-modal').classList.remove('hidden');
+    if (typeof initSwipeToClose === 'function') initSwipeToClose();
+}
 
 
     function closeDetails(event) {
-        if(event && event.target.id !== 'detail-modal') return;
-        document.getElementById('detail-modal').classList.add('hidden');
+    if (event && event.target.id !== 'detail-modal') return;
+    document.getElementById('detail-modal').classList.add('hidden');
+    
+    // Reset transform so subsequent opens aren't stuck shifted 
+    const modal = document.getElementById('modal-content');
+    if (modal) {
+        setTimeout(() => { modal.style.transform = 'translateY(0)'; }, 300);
     }
+}
 
     function viewImage(url) {
         const viewer = document.getElementById('image-viewer');
@@ -706,21 +750,64 @@
 
     function initSwipeToClose() {
         const modal = document.getElementById('modal-content');
+        const pullHandle = document.getElementById('pull-handle');
+        const header = modal.querySelector('.border-b'); 
+        
         if(!modal) return;
-        let startY = 0; let currentY = 0;
+        
+        let startY = 0; let currentY = 0; let isDragging = false;
 
-        modal.ontouchstart = (e) => { startY = e.touches[0].clientY; modal.style.transition = 'none'; };
-        modal.ontouchmove = (e) => {
-            currentY = e.touches[0].clientY - startY;
-            if (currentY > 0) modal.style.transform = `translateY(${currentY}px)`;
+        // Strip previous global bindings completely
+        modal.ontouchstart = null;
+        modal.ontouchmove = null;
+        modal.ontouchend = null;
+
+        // ONLY trigger drag mechanics if starting from the top pullHandle or header
+        const startDrag = (e) => {
+            startY = e.touches[0].clientY; 
+            isDragging = true; 
+            modal.style.transition = 'none'; 
         };
+
+        if (pullHandle) pullHandle.ontouchstart = startDrag;
+        if (header) header.ontouchstart = startDrag;
+
+        modal.ontouchmove = (e) => {
+            if (!isDragging) return;
+            currentY = e.touches[0].clientY - startY;
+            if (currentY > 0) {
+                e.preventDefault(); // Lock screen scrolling while sliding the modal down
+                modal.style.transform = `translateY(${currentY}px)`;
+            }
+        };
+        
         modal.ontouchend = () => {
+            if (!isDragging) return;
+            isDragging = false;
             modal.style.transition = 'transform 0.3s ease-out';
-            if (currentY > 150) closeDetails();
-            else modal.style.transform = `translateY(0)`;
+            if (currentY > 150) {
+                closeDetails();
+            } else {
+                modal.style.transform = `translateY(0)`; // Snap back if pull wasn't far enough
+            }
             currentY = 0;
         };
     }
+    
+function updateModalStatusColor() {
+    const select = document.getElementById('modal-status-select');
+    if (!select) return;
+    const val = select.value;
+    
+    let colors = 'bg-gray-50 border-gray-200 text-gray-800'; // Default
+    if (val === 'New' || val === 'Intake') colors = 'bg-orange-100 border-orange-300 text-orange-800';
+    else if (val === 'Confirmed') colors = 'bg-blue-100 border-blue-300 text-blue-800';
+    else if (val === 'Shipped') colors = 'bg-purple-100 border-purple-300 text-purple-800';
+    else if (val === 'Delivered') colors = 'bg-green-100 border-green-300 text-green-800';
+    else if (val === 'Failed Delivery' || val === 'Canceled') colors = 'bg-red-100 border-red-300 text-red-800';
+    
+    select.className = `w-full p-2.5 rounded-xl text-sm font-black outline-none mb-3 border ${colors} transition-colors duration-300`;
+}    
 </script>
 </body>
 </html>
