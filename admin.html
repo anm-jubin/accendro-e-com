@@ -324,21 +324,6 @@
         }
     }
 
-    // === DATA FETCHING & INITIALIZATION ===
-    window.onload = function() {
-        if (adminPassword) {
-            const cachedData = localStorage.getItem(CACHE_KEY);
-            if (cachedData) {
-                try { 
-                    allOrders = JSON.parse(cachedData); 
-                    renderOrders(); 
-                } catch(e) { console.error("Cache corrupted"); }
-            }
-            fetchData(false, false); 
-        } else {
-            document.getElementById('login-screen').classList.remove('hidden');
-        }
-    };
 
     async function fetchData(force = false, isManualLogin = false) {
         if (!adminPassword) return; 
