@@ -267,14 +267,27 @@
     let currentSortBy = localStorage.getItem('admin_sort') || 'Time';
     
     window.addEventListener('DOMContentLoaded', () => {
-        const grp = document.getElementById('group-select');
-        const srt = document.getElementById('sort-select');
-        if (grp) grp.value = currentGroupBy;
-        if (srt) srt.value = currentSortBy;
+    const grp = document.getElementById('group-select');
+    const srt = document.getElementById('sort-select');
+    if (grp) grp.value = currentGroupBy;
+    if (srt) srt.value = currentSortBy;
+    
+    if (adminPassword) {
+        const cachedData = localStorage.getItem(CACHE_KEY);
+        if (cachedData) {
+            try {
+                allOrders = JSON.parse(cachedData);
+                // Automatically convert any legacy "Intake" orders to "New" in memory
+                allOrders.forEach(o => { if (o.Status === 'Intake') o.Status = 'New'; });
+            } catch (e) { console.error("Cache corrupted"); }
+        }
         
-        // This instantly turns the "All" tab orange on load
-        setStatusFilter(currentFilter); 
-    });
+        setStatusFilter(currentFilter);
+        fetchData(false, false);
+    } else {
+        document.getElementById('login-screen').classList.remove('hidden');
+    }
+});
 
     function changeGroup(val) { currentGroupBy = val; localStorage.setItem('admin_group', val); renderOrders(); }
     function changeSort(val) { currentSortBy = val; localStorage.setItem('admin_sort', val); renderOrders(); }
