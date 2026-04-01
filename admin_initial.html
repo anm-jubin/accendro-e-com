@@ -247,11 +247,16 @@
 
 <script src="global.js"></script>
 <script>
-    // === CONFIGURATION ===
-        const CACHE_KEY = "admin_orders_cache";
+    // === CONFIGURATION & SAFETY FALLBACK ===
+    // If offline and global.js fails to load, this prevents the app from crashing.
+    const API_URL = typeof GOOGLE_SCRIPT_URL !== 'undefined' 
+        ? GOOGLE_SCRIPT_URL 
+        : "https://script.google.com/macros/s/AKfycbxqLSwta_gqOlZxYyKC1jjg4kd6CguDnj3UKPt10QAI2t9XHLcml3Ikqx8m9A-X08Wd2g/exec";
+
+    const CACHE_KEY = "admin_orders_cache";
     const TIME_KEY = "admin_last_fetch";
     
-    let allOrders = [];
+    let allOrders =[];
     let currentFilter = 'All';
     let selectedOrderIndex = null;
     let saveTimeout = null;
@@ -262,18 +267,19 @@
     let currentSortBy = localStorage.getItem('admin_sort') || 'Time';
     
     window.addEventListener('DOMContentLoaded', () => {
-    const grp = document.getElementById('group-select');
-    const srt = document.getElementById('sort-select');
-    if (grp) grp.value = currentGroupBy;
-    if (srt) srt.value = currentSortBy;
-});
-
+        const grp = document.getElementById('group-select');
+        const srt = document.getElementById('sort-select');
+        if (grp) grp.value = currentGroupBy;
+        if (srt) srt.value = currentSortBy;
+        
+        // This instantly turns the "All" tab orange on load
+        setStatusFilter(currentFilter); 
+    });
 
     function changeGroup(val) { currentGroupBy = val; localStorage.setItem('admin_group', val); renderOrders(); }
     function changeSort(val) { currentSortBy = val; localStorage.setItem('admin_sort', val); renderOrders(); }
     
-    
-// === AUTHENTICATION LOGIC ===
+    // === AUTHENTICATION LOGIC ===
     function togglePw() {
         const input = document.getElementById('pw-input');
         const eye = document.getElementById('pw-eye');
@@ -297,9 +303,8 @@
         btn.disabled = true;
 
         adminPassword = pw;
-        await fetchData(true, true); // Force fetch to verify new password immediately
+        await fetchData(true, true); 
         
-        // Reset button if login failed
         if(!adminPassword) {
             btn.innerHTML = `<span>Access Orders</span>`;
             btn.disabled = false;
@@ -309,7 +314,6 @@
     // === DATA FETCHING & INITIALIZATION ===
     window.onload = function() {
         if (adminPassword) {
-            // Assume password is correct, instantly load from memory
             const cachedData = localStorage.getItem(CACHE_KEY);
             if (cachedData) {
                 try { 
@@ -317,23 +321,19 @@
                     renderOrders(); 
                 } catch(e) { console.error("Cache corrupted"); }
             }
-            
-            // Do a standard background check (respects 60s rule)
             fetchData(false, false); 
         } else {
-            // No password saved, show login screen
             document.getElementById('login-screen').classList.remove('hidden');
         }
     };
 
     async function fetchData(force = false, isManualLogin = false) {
-        if (!adminPassword) return; // Prevent fetch if no password
+        if (!adminPassword) return; 
         
         const now = Date.now();
         const lastFetch = localStorage.getItem(TIME_KEY) || 0;
         const container = document.getElementById('order-container');
         
-        // Use cache if not forced (like manual refresh or login) and less than 60s
         if (!force && (now - lastFetch < 60000) && allOrders.length > 0) return;
 
         if (allOrders.length === 0 && !isManualLogin) {
@@ -344,23 +344,19 @@
         if(refreshIcon) refreshIcon.classList.add('animate-spin');
 
         try {
-            // Pass dynamic password to API
-            const res = await fetch(`${GOOGLE_SCRIPT_URL}?pw=${encodeURIComponent(adminPassword)}`); 
+            const res = await fetch(`${API_URL}?pw=${encodeURIComponent(adminPassword)}`); 
             
             if (res.ok) {
                 const data = await res.json();
                 
-                // 1. Check if Google Script rejected the password
                 if (data.error === "Unauthorized access") {
                     throw new Error("unauth");
                 }
 
-                // 2. Successful Manual Login
                 if (isManualLogin) {
-                    localStorage.setItem('admin_pw', adminPassword); // Save for next time
+                    localStorage.setItem('admin_pw', adminPassword); 
                     document.getElementById('login-screen').classList.add('hidden');
                     
-                    // Render cache immediately if we haven't already
                     const cachedData = localStorage.getItem(CACHE_KEY);
                     if (cachedData && allOrders.length === 0) {
                         try { allOrders = JSON.parse(cachedData); renderOrders(); } catch(e){}
@@ -369,7 +365,6 @@
                 
                 const fetchedOrders = Array.isArray(data) ? data.reverse() :[];
                 
-                // Smart cache update (don't update if currently typing a note)
                 if (document.activeElement.id !== 'modal-admin-note') {
                     allOrders = fetchedOrders;
                     localStorage.setItem(CACHE_KEY, JSON.stringify(allOrders));
@@ -381,19 +376,23 @@
             }
         } catch (err) {
             if (err.message === "unauth") {
-                // Wipe bad password & show error
                 adminPassword = '';
                 localStorage.removeItem('admin_pw');
                 document.getElementById('login-screen').classList.remove('hidden');
                 
                 if (isManualLogin) {
+                    document.getElementById('login-error').innerText = "Invalid password.";
                     document.getElementById('login-error').classList.remove('hidden');
                 } else {
-                    // Password was changed on server while user was browsing
                     alert("Session expired or password changed. Please log in again.");
                     container.innerHTML = `<div class="text-center text-gray-400 mt-10"><i class="ri-lock-2-line text-3xl"></i><p class="text-sm mt-2">Please log in.</p></div>`;
                 }
             } else {
+                if (isManualLogin) {
+                    document.getElementById('login-error').innerText = "Network error. You are offline.";
+                    document.getElementById('login-error').classList.remove('hidden');
+                    adminPassword = '';
+                }
                 if (allOrders.length === 0) container.innerHTML = `<p class="text-center text-red-500 mt-10">Network error.</p>`;
             }
         } finally {
@@ -403,6 +402,7 @@
 
     // === AUTO-SAVE LOGIC ===
     function autoSaveTrigger() {
+        updateSelectColor(); // Instantly change dropdown color
         const indicator = document.getElementById('sync-indicator');
         indicator.innerText = "Typing...";
         indicator.className = "text-[10px] font-bold text-orange-500";
@@ -427,14 +427,14 @@
 
         const order = allOrders.find(o => o.rowIndex === selectedOrderIndex);
         const payload = { 
-            pw: "my_admin_password_123", 
+            pw: adminPassword, 
             rowIndex: selectedOrderIndex, 
             status: order.Status,
             adminNote: order.Admin_Note 
         };
 
         try {
-            await fetch(GOOGLE_SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) });
+            await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
             indicator.innerText = "Saved to Cloud ✓";
             indicator.className = "text-[10px] font-bold text-green-600";
             setTimeout(() => { 
@@ -466,9 +466,9 @@
         currentFilter = status;
         document.querySelectorAll('.filter-btn').forEach(btn => {
             if(btn.innerText === status) {
-                btn.className = 'filter-btn active-filter shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-800 text-white transition';
+                btn.className = 'filter-btn active-filter shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-orange-500 text-white shadow-md transition';
             } else {
-                btn.className = 'filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border transition';
+                btn.className = 'filter-btn shrink-0 px-4 py-1.5 rounded-full text-xs font-bold bg-gray-100 text-gray-600 border transition hover:bg-gray-200';
             }
         });
         renderOrders();
@@ -516,14 +516,25 @@
         document.getElementById('detail-modal').classList.add('hidden');
     }
 
-// === RENDERING UI ===
+    // === RENDERING UI ===
     function renderOrders() {
         const container = document.getElementById('order-container');
-        const searchVal = document.getElementById('search').value.toLowerCase();
+        const searchInput = document.getElementById('search');
+        if (!container || !searchInput) return;
+
+        const searchVal = searchInput.value.toLowerCase();
         
-        // Show/hide clear search button
         const clearBtn = document.getElementById('clear-search');
         if(clearBtn) clearBtn.style.display = searchVal ? 'block' : 'none';
+
+        // Search Highlight UI
+        if (searchVal) {
+            searchInput.classList.remove('bg-gray-100');
+            searchInput.classList.add('bg-orange-50', 'ring-2', 'ring-orange-500');
+        } else {
+            searchInput.classList.remove('bg-orange-50', 'ring-2', 'ring-orange-500');
+            searchInput.classList.add('bg-gray-100');
+        }
 
         let filtered = allOrders.filter(o => {
             const statusMatch = currentFilter === 'All' || o.Status === currentFilter;
@@ -548,7 +559,7 @@
         }
 
         const groups = {}; const groupKeys =[];
-        const today = new Date(); // Get current date
+        const today = new Date(); 
 
         filtered.forEach(order => {
             let key = "Unknown Date"; 
@@ -556,11 +567,9 @@
             
             if (!isNaN(d.getTime())) {
                 if (currentGroupBy === 'Daily') {
-                    // Check if the order date matches today's date
                     const isToday = d.getDate() === today.getDate() && 
                                     d.getMonth() === today.getMonth() && 
                                     d.getFullYear() === today.getFullYear();
-                    
                     key = isToday ? "Today" : formatCustomDate(d);
                 }
                 else if (currentGroupBy === 'Weekly') {
@@ -574,7 +583,7 @@
             groups[key].push(order);
         });
 
-        const stageWeights = { 'Intake': 1, 'Confirmed': 2, 'Shipped': 3, 'Delivered': 4, 'Failed Delivery': 5, 'Canceled': 6 };
+        const stageWeights = { 'New': 1, 'Intake': 1, 'Confirmed': 2, 'Shipped': 3, 'Delivered': 4, 'Failed Delivery': 5, 'Canceled': 6 };
         let html = '';
 
         groupKeys.forEach(key => {
@@ -583,7 +592,6 @@
                 return new Date(b.Timestamp).getTime() - new Date(a.Timestamp).getTime();
             });
 
-            // Make "Today" visually distinct (orange text) if you want, or just standard
             const isTodayHeader = key === "Today";
             const headerColor = isTodayHeader ? "text-orange-500 font-black" : "text-gray-400 font-bold";
 
@@ -595,7 +603,7 @@
                 const dupInfo = getDuplicateInfo(order);
                 
                 let statusColor = 'bg-gray-100 text-gray-600';
-                if(order.Status === 'Intake') statusColor = 'bg-orange-100 text-orange-700 border-orange-200';
+                if(order.Status === 'New' || order.Status === 'Intake') statusColor = 'bg-orange-100 text-orange-700 border-orange-200';
                 if(order.Status === 'Confirmed') statusColor = 'bg-blue-100 text-blue-700 border-blue-200';
                 if(order.Status === 'Delivered') statusColor = 'bg-green-100 text-green-700 border-green-200';
                 if(order.Status === 'Failed Delivery' || order.Status === 'Canceled') statusColor = 'bg-red-100 text-red-700 border-red-200';
@@ -612,7 +620,7 @@
                         </div>
 
                         <div class="shrink-0 flex flex-col items-center justify-center pl-2">
-                            <span class="text-[10px] px-2.5 py-1.5 rounded-lg font-black tracking-wide border shadow-sm ${statusColor}">${order.Status || 'Intake'}</span>
+                            <span class="text-[10px] px-2.5 py-1.5 rounded-lg font-black tracking-wide border shadow-sm ${statusColor}">${order.Status || 'New'}</span>
                         </div>
                     </div>
                     ${dupInfo.msg ? `<div class="mt-2 text-[9px] bg-red-50 text-red-600 px-2 py-1 rounded border border-red-200 inline-block font-bold active:bg-red-100 transition self-start" onclick="filterDuplicates(event, '${dupInfo.searchTarget}')">⚠️ ${dupInfo.msg}</div>` : ''}
@@ -637,8 +645,6 @@
         document.getElementById('modal-total').innerText = order.Total_Price || '0';
         
         document.getElementById('modal-items').innerHTML = (order.Order_Details || "").replace(/\n/g, '<br>');
-        
-        // Blank raw IP data from the sheet
         document.getElementById('modal-ip-text').innerText = order.Security___IP_Info || "No IP Captured";
 
         let dStr = "Unknown Date";
@@ -670,7 +676,7 @@
             dupWarn.classList.add('hidden');
         }
 
-        document.getElementById('modal-status-select').value = order.Status || 'Intake';
+        document.getElementById('modal-status-select').value = order.Status || 'New';
         document.getElementById('modal-admin-note').value = order.Admin_Note || '';
 
         const imgs = (order.Image_Links || "").split('\n\n').filter(i => i.trim());
@@ -683,12 +689,24 @@
 
         const cleanPhone = String(order.Phone).replace(/[^0-9+]/g, '');
         document.getElementById('btn-call').href = `tel:${cleanPhone}`;
-        // WhatsApp link removed entirely from JS
 
         document.getElementById('detail-modal').classList.remove('hidden');
-        if(typeof initSwipeToClose === 'function') initSwipeToClose();
+        
+        updateSelectColor(); 
+        initSwipeToClose();
     }
 
+    function updateSelectColor() {
+        const select = document.getElementById('modal-status-select');
+        if (!select) return;
+        const val = select.value;
+        select.className = "w-full p-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-bold outline-none mb-3 transition duration-200 ";
+        if (val === 'New' || val === 'Intake') select.className += '!bg-orange-100 !text-orange-800 !border-orange-300';
+        else if (val === 'Confirmed') select.className += '!bg-blue-100 !text-blue-800 !border-blue-300';
+        else if (val === 'Shipped') select.className += '!bg-purple-100 !text-purple-800 !border-purple-300';
+        else if (val === 'Delivered') select.className += '!bg-green-100 !text-green-800 !border-green-300';
+        else if (val === 'Failed Delivery' || val === 'Canceled') select.className += '!bg-red-100 !text-red-800 !border-red-300';
+    }
 
     function closeDetails(event) {
         if(event && event.target.id !== 'detail-modal') return;
@@ -704,17 +722,23 @@
         }
     }
 
+    // Modal ONLY closes when pulling from the handle at the top
     function initSwipeToClose() {
         const modal = document.getElementById('modal-content');
-        if(!modal) return;
+        const dragArea = document.getElementById('pull-handle'); 
+        if(!modal || !dragArea) return;
+        
         let startY = 0; let currentY = 0;
 
-        modal.ontouchstart = (e) => { startY = e.touches[0].clientY; modal.style.transition = 'none'; };
-        modal.ontouchmove = (e) => {
+        dragArea.ontouchstart = (e) => { startY = e.touches[0].clientY; modal.style.transition = 'none'; };
+        dragArea.ontouchmove = (e) => {
             currentY = e.touches[0].clientY - startY;
-            if (currentY > 0) modal.style.transform = `translateY(${currentY}px)`;
+            if (currentY > 0) {
+                e.preventDefault(); 
+                modal.style.transform = `translateY(${currentY}px)`;
+            }
         };
-        modal.ontouchend = () => {
+        dragArea.ontouchend = () => {
             modal.style.transition = 'transform 0.3s ease-out';
             if (currentY > 150) closeDetails();
             else modal.style.transform = `translateY(0)`;
