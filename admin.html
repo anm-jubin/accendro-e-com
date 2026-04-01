@@ -587,32 +587,49 @@
         let html = '';
 
         groupKeys.forEach(key => {
-            groups[key].sort((a, b) => {
-                if (currentSortBy === 'Stage') return (stageWeights[a.Status] || 99) - (stageWeights[b.Status] || 99);
-                return new Date(b.Timestamp).getTime() - new Date(a.Timestamp).getTime();
-            });
-
-            const isTodayHeader = key === "Today";
-            const headerColor = isTodayHeader ? "text-orange-500 font-black" : "text-gray-400 font-bold";
-
-            html += `<div class="flex items-center gap-3 my-4 mt-6"><div class="h-px bg-gray-200 flex-1"></div><h2 class="text-[11px] ${headerColor} uppercase tracking-widest">${key}</h2><div class="h-px bg-gray-200 flex-1"></div></div>`;
-
-            groups[key].forEach(order => {
-    const images = (order.Image_Links || "").split('\n\n').filter(i => i.trim());
-    const thumb = images.length > 0 ? images[0] : 'https://via.placeholder.com/150?text=No+Img';
+    groups[key].sort((a, b) => {
+        if (currentSortBy === 'Stage') return (stageWeights[a.Status] || 99) - (stageWeights[b.Status] || 99);
+        return new Date(b.Timestamp).getTime() - new Date(a.Timestamp).getTime();
+    });
     
-    // NEW: Calculate item count based on images
-    const itemCount = images.length;
+    // NEW: Calculate Revenue for Delivered Items (Subtotal only)
+    let groupRevenue = 0;
+    groups[key].forEach(order => {
+        if (order.Status === 'Delivered') {
+            // Strips out text/symbols and adds the number safely
+            const subtotalRaw = order.Subtotal || order.Subtotal_Price || 0;
+            groupRevenue += Number(String(subtotalRaw).replace(/[^0-9.]/g, '')) || 0;
+        }
+    });
     
-    const dupInfo = getDuplicateInfo(order);
+    const isTodayHeader = key === "Today";
+    const headerColor = isTodayHeader ? "text-orange-500 font-black" : "text-gray-400 font-bold";
     
-    let statusColor = 'bg-gray-100 text-gray-600';
-    if (order.Status === 'New' || order.Status === 'Intake') statusColor = 'bg-orange-100 text-orange-700 border-orange-200';
-    if (order.Status === 'Confirmed') statusColor = 'bg-blue-100 text-blue-700 border-blue-200';
-    if (order.Status === 'Delivered') statusColor = 'bg-green-100 text-green-700 border-green-200';
-    if (order.Status === 'Failed Delivery' || order.Status === 'Canceled') statusColor = 'bg-red-100 text-red-700 border-red-200';
+    // Generate Revenue Badge (Only shows if revenue > 0)
+    let revenueHtml = '';
+    if (groupRevenue > 0) {
+        revenueHtml = `<span class="ml-2 bg-green-100 text-green-700 px-1.5 py-0.5 rounded text-[9px] font-black tracking-normal shadow-sm">Revenue: ৳${groupRevenue.toLocaleString()}</span>`;
+    }
     
-    html += `
+    // Append badge into the h2 header
+    html += `<div class="flex items-center gap-3 my-4 mt-6"><div class="h-px bg-gray-200 flex-1"></div><h2 class="text-[11px] ${headerColor} uppercase tracking-widest flex items-center">${key}${revenueHtml}</h2><div class="h-px bg-gray-200 flex-1"></div></div>`;
+    
+    groups[key].forEach(order => {
+        const images = (order.Image_Links || "").split('\n\n').filter(i => i.trim());
+        const thumb = images.length > 0 ? images[0] : 'https://via.placeholder.com/150?text=No+Img';
+        
+        // NEW: Calculate item count based on images
+        const itemCount = images.length;
+        
+        const dupInfo = getDuplicateInfo(order);
+        
+        let statusColor = 'bg-gray-100 text-gray-600';
+        if (order.Status === 'New' || order.Status === 'Intake') statusColor = 'bg-orange-100 text-orange-700 border-orange-200';
+        if (order.Status === 'Confirmed') statusColor = 'bg-blue-100 text-blue-700 border-blue-200';
+        if (order.Status === 'Delivered') statusColor = 'bg-green-100 text-green-700 border-green-200';
+        if (order.Status === 'Failed Delivery' || order.Status === 'Canceled') statusColor = 'bg-red-100 text-red-700 border-red-200';
+        
+        html += `
                 <div class="bg-white p-3 mb-3 rounded-2xl shadow-sm border border-gray-100 active:scale-[0.98] transition cursor-pointer flex flex-col" onclick="openDetails(${order.rowIndex})">
                     <div class="flex gap-3 items-center w-full">
                         <img src="${thumb}" decoding="async" loading="lazy" class="w-16 h-16 object-cover rounded-xl bg-gray-50 border border-gray-100 shrink-0">
@@ -634,8 +651,8 @@
                     </div>
                     ${dupInfo.msg ? `<div class="mt-2 text-[9px] bg-red-50 text-red-600 px-2 py-1 rounded border border-red-200 inline-block font-bold active:bg-red-100 transition self-start" onclick="filterDuplicates(event, '${dupInfo.searchTarget}')">⚠️ ${dupInfo.msg}</div>` : ''}
                 </div>`;
+    });
 });
-        });
         container.innerHTML = html;
     }
 
