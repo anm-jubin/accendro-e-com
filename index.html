@@ -220,9 +220,21 @@ function renderSidebarMenu() {
 }
 
 function filterByType(type, subType = null, clickedElement = null) {
+    // 1. Remove highlight from all elements
     document.querySelectorAll('.menu-category, .menu-category span, .sub-menu p').forEach(el => el.classList.remove('active-cat'));
-    if (clickedElement) clickedElement.classList.add('active-cat');
-
+    
+    if (clickedElement) {
+        // 2. Highlight the clicked element
+        clickedElement.classList.add('active-cat');
+        
+        // --- NEW: AUTO-OPEN ACCORDION ---
+        // If they clicked a main category (not "All" and not a sub-type), force the accordion open!
+        if (type !== 'All' && !subType && clickedElement.classList.contains('menu-category')) {
+            clickedElement.classList.add('open');
+        }
+    }
+    
+    // 3. Filter the products
     if (type === 'All') {
         currentProducts = [...allProducts];
         toggleSortBar(false);
@@ -233,6 +245,8 @@ function filterByType(type, subType = null, clickedElement = null) {
         currentProducts = allProducts.filter(p => p.type === type);
         toggleSortBar(true);
     }
+    
+    // 4. Redraw the grid and close the sidebar
     renderGrid(currentProducts);
     toggleMenu();
 }
