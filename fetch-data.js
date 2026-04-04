@@ -1,7 +1,7 @@
 const fs = require('fs');
 
 // 👉 PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE:
-const API_URL = "https://script.google.com/macros/s/AKfycbzETUFdzOQdgCRx6McNpSZNC1O8G2l-KVTY8aBx5mGQb-S5zZstdjvcMMZG8Eg_JKiv_A/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycbxqLSwta_gqOlZxYyKC1jjg4kd6CguDnj3UKPt10QAI2t9XHLcml3Ikqx8m9A-X08Wd2g/exec";
 
 async function fetchProducts() {
     try {
